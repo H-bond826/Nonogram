@@ -1,3 +1,3 @@
 # Nonogram
 
-this is a 
+This is a Nonogram game implemented with R and Shiny.
