@@ -2,12 +2,13 @@
 
 This is a Nonogram game implemented with R and Shiny.
 
-Nonograms - Les règles
+The code is integrated in the game.R file, you can simply ctrl + a + c + v.
 
-Le but de ce jeu est de découvrir une planche de cellules bleues et de cellules libres. Vous pouvez faire ceci en suivant les définitions des lignes et des colonnes – des séquences de nombres qui décrivent les groupes de cellules bleues apparaissant sur ces lignes et colonnes. En exemple 1 5 2 représente successivement: 1 cellule, 5 cellules et 2 cellules bleues séparées entre elles par une ou plusieurs cellules vides.
+# The Rules
 
-Cliquez les cellules une fois pour les marquer occupées. Cliquez encore une fois afin de les marquer avec un X. Ceci vous permet de marquer les cellules que vous considérez comme vides. Cliquez les cellules encore une fois pour les ramener à leurs états initiaux.
+The objective of this game is to uncover a board of blue cells and free cells. You can achieve this by following the definitions for the rows and columns – sequences of numbers that describe the groups of blue cells appearing on these rows and columns. For example, 1 5 2 represents: 1 cell, 5 cells, and 2 blue cells, each separated by one or more empty cells.
 
-Ce jeux est également connu sous plusieurs noms : Picross, la peinture des nombres, Crucipixel, Edel, FigurePic, Grafilogika, Griddlers, Hanjie, Illust-Logique, mots croisé japonais, puzzles japonais, Kare Karala!, Art de logique, Cellules de logique, Logicolor, Logik-Puzzles, Logimage, Zakókodované obrázky, Maľované krížovky, logique d'Oekaki, Oekaki-Compagnon, Pic-a-Pix, puzzles de Pixel, Shchor Uftor et Tsunami. Bonne chance!
+Click on the cells once to mark them as occupied. Click again to mark them with an X. This allows you to indicate cells you consider to be empty. Click on the cells once more to return them to their initial state.
 
+This game is also known by several names: Picross, Paint by Numbers, Crucipixel, Edel, FigurePic, Grafilogika, Griddlers, Hanjie, Illust-Logic, Japanese Crosswords, Japanese Puzzles
 
