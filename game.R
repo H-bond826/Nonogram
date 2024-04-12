@@ -1,6 +1,5 @@
 library(shiny)
 
-
 gameCreate <- function(n, difficulty) {
   #Initialisation des variables
   p <- 0.666  # la probabilité que chaque cellule soit remplie aléatoirement
