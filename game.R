@@ -173,8 +173,29 @@ gameCreate <- function(n, difficulty) {
 # Function to draw the grid
 draw_grid <- function(grid_state, gridSize, indications) {
   
-  plot(1:gridSize, 1:gridSize, type = "n", xlab = "", ylab = "", xaxt = 'n', yaxt = 'n', xlim = c(-gridSize*0.10, gridSize+1), ylim = c(1, gridSize*1.5))
-  
+  plot(1:gridSize, 1:gridSize, type = "n", xlab = "", ylab = "", xaxt = 'n', yaxt = 'n', xlim = c(-0.02, gridSize+1), ylim = c(1, gridSize*1.2), asp = 1, bty = "n")
+  for(x in 1:gridSize) {
+    for(y in 1:gridSize) {
+      # Draw the rectangle with a border first
+      rect(x, y, x + 1, y + 1, col = ifelse(grid_state[x, y] == 1, "blue", "white"), border = "black", lwd = 1)
+      
+      # Then draw the lines if needed
+      if(grid_state[x, y] == 2) {
+        offset = 0.1  # Define an offset
+        lines(c(x + offset, x + 1 - offset), c(y + offset, y + 1 - offset), col = "red", lwd = 2)
+        lines(c(x + 1 - offset, x + offset), c(y + offset, y + 1 - offset), col = "red", lwd = 2)
+      }
+    }
+  }
+  # Define margins to accommodate the indications
+  par(mar = c(0, gridSize, 0, 0))
+  for (i in 1:gridSize) {
+    for (j in floor(gridSize/2):1) {
+      text(x = i+0.5, y = gridSize+1.2+j*(gridSize/28+0.1), paste(indications$vertical[(gridSize/2)-j+1, i], collapse = " "), adj = c(1, 1), font = 2, cex=1.7/log(gridSize))
+      
+    }
+    text(x = 1, y = gridSize-i+1.7, paste(indications$horizontal[i,], collapse = " "), adj = c(1, 1), font = 2, cex=1.7/log(gridSize))
+  }
 }
 
 
@@ -185,7 +206,7 @@ ui <- fluidPage(
     column(4,
            div(id = "controls",
                wellPanel(
-                 sliderInput("gridSize", "Grid size", min = 5, max = 15, value = 5),
+                 sliderInput("gridSize", "Grid size", min = 5, max = 20, value = 5),
                  selectInput("difficulty", "difficultyiculty", choices = c("Easy", "Medium", "Hard"), selected = "Medium"),
                  actionButton("update", "Create game", style = "background-color: red; color: white;"),  # Add the update button with red background
                  actionButton("verify", "Verify", style = "background-color: green; color: white;")  # Add the solve button with green background
