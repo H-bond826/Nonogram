@@ -1,7 +1,5 @@
 library(shiny)
-rotate90 <- function(mat) {
-  return(t(mat[, ncol(mat):1]))
-}
+
 
 gameCreate <- function(n, difficulty) {
   #Initialisation des variables
@@ -170,6 +168,10 @@ gameCreate <- function(n, difficulty) {
   return(list(matindichori = matindichori, matindicvert = matindicvert, X = X, compteurH = compteurH, compteurV = compteurV))
 }
 
+rot <- function(mat) {
+  return(t(mat[, ncol(mat):1]))
+}
+
 # Function to draw the grid
 draw_grid <- function(grid_state, gridSize, indications) {
   
@@ -255,10 +257,10 @@ server <- function(input, output, session) {
   })
   
   observeEvent(input$verify, {  # Listen for clicks on the verify button
-    print(rotate90(grid_state()))
-    #print(solution()== rotate90(grid_state()))
+    print(rot(grid_state()))
+    #print(solution()== rot(grid_state()))
     #transform all cells that are 2 to 0
-    test<-rotate90(grid_state())
+    test<-rot(grid_state())
     test[test == 2] <- 0
     if(all(test==solution())) {
       showNotification("Congratulations! You have solved the game.", type = "message")
