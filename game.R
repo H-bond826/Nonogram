@@ -170,3 +170,50 @@ gameCreate <- function(n, difficulty) {
   return(list(matindichori = matindichori, matindicvert = matindicvert, X = X, compteurH = compteurH, compteurV = compteurV))
 }
 
+# Function to draw the grid
+draw_grid <- function(grid_state, gridSize, indications) {
+  
+  plot(1:gridSize, 1:gridSize, type = "n", xlab = "", ylab = "", xaxt = 'n', yaxt = 'n', xlim = c(-gridSize*0.10, gridSize+1), ylim = c(1, gridSize*1.5))
+  
+}
+
+
+ui <- fluidPage(
+  titlePanel("Picross"),
+  tags$style(type="text/css", "#controls { width: 60%; margin: 0 auto; }"),
+  fluidRow(
+    column(4,
+           div(id = "controls",
+               wellPanel(
+                 sliderInput("gridSize", "Grid size", min = 5, max = 15, value = 5),
+                 selectInput("difficulty", "difficultyiculty", choices = c("Easy", "Medium", "Hard"), selected = "Medium"),
+                 actionButton("update", "Create game", style = "background-color: red; color: white;"),  # Add the update button with red background
+                 actionButton("verify", "Verify", style = "background-color: green; color: white;")  # Add the solve button with green background
+               )
+           )
+    ),
+    column(8,
+           wellPanel(
+             conditionalPanel(
+               condition = "output.gridExists",
+               plotOutput("grid", click = "grid_click", height = "800px")  # Increase the height of the grid
+             ),
+             conditionalPanel(
+               condition = "!output.gridExists",
+               tags$div(
+                 style = "text-align: center; padding: 50px;",
+                 tags$h1("Welcome to Picross!", style = "color: #3399FF;"),
+                 tags$p("Please select the parameters and create the game.", style = "font-size: 20px;")
+               )
+             )
+           )
+    )
+  )
+)
+
+
+
+
+
+# Run the app
+shinyApp(ui = ui, server = server)
