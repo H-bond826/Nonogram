@@ -1,5 +1,4 @@
 library(shiny)
-
 gameCreate <- function(n, difficulty) {
   #Initialisation des variables
   p <- 0.666  # la probabilité que chaque cellule soit remplie aléatoirement
@@ -167,20 +166,14 @@ gameCreate <- function(n, difficulty) {
   return(list(matindichori = matindichori, matindicvert = matindicvert, X = X, compteurH = compteurH, compteurV = compteurV))
 }
 
-rot <- function(mat) {
-  return(t(mat[, ncol(mat):1]))
-}
-
 # Function to draw the grid
 draw_grid <- function(grid_state, gridSize, indications) {
   
   plot(1:gridSize, 1:gridSize, type = "n", xlab = "", ylab = "", xaxt = 'n', yaxt = 'n', xlim = c(-gridSize*0.10, gridSize+1), ylim = c(1, gridSize*1.2), asp = 1, bty = "n")
   for(x in 1:gridSize) {
     for(y in 1:gridSize) {
-      # Draw the rectangle with a border first
       rect(x, y, x + 1, y + 1, col = ifelse(grid_state[x, y] == 1, "blue", "white"), border = "black", lwd = 1)
       
-      # Then draw the lines if needed
       if(grid_state[x, y] == 2) {
         offset = 0.1  # Define an offset
         lines(c(x + offset, x + 1 - offset), c(y + offset, y + 1 - offset), col = "red", lwd = 2)
@@ -198,7 +191,9 @@ draw_grid <- function(grid_state, gridSize, indications) {
     text(x = 1, y = gridSize-i+1.7, paste(indications$horizontal[i,], collapse = " "), adj = c(1, 1), font = 2, cex=1.7/log(gridSize))
   }
 }
-
+rotate90 <- function(mat) {
+  return(t(mat[, ncol(mat):1]))
+}
 
 ui <- fluidPage(
   titlePanel("Nonograms"),
@@ -207,31 +202,33 @@ ui <- fluidPage(
     column(4,
            div(id = "controls",
                wellPanel(
-                 sliderInput("gridSize", "nxn", min = 5, max = 20, value = 6),
-                 selectInput("difficulty", "difficulty", choices = c("Easy", "Medium", "Hard"), selected = "Medium"),
+                 style = "background-color: #FFFFFF;",
+                 tags$head(
+                   tags$style(HTML(".js-irs-0 .irs-grid { display: none; }"))
+                 ),
+                 sliderInput("gridSize", "Grid Size", min = 5, max = 20, value = 6),
+                 selectInput("difficulty", "difficulty", choices = c("Easy", "Medium", "Expert"), selected = "Medium"),
                  actionButton("update", "Generate", style = "background-color: #3399FF; color: white;"),  
                  actionButton("verify", "Check", style = "background-color: green; color: white;")  
                )
            )
     ),
     column(8,
-           wellPanel(
-             conditionalPanel(
-               condition = "output.gridExists",
-               plotOutput("grid", click = "grid_click", height = "800px")  # Increase the height of the grid
-             ),
-             conditionalPanel(
-               condition = "!output.gridExists",
-               tags$div(
-                 style = "text-align: center; padding: 50px;",
-                 tags$h1("Nonograms ", style = "color: #3399FF;"),
-                 tags$p("Le but de ce jeu est de découvrir une planche de cellules bleues et de cellules libres. 
-                        Vous pouvez faire ceci en suivant les définitions des lignes et des colonnes – des séquences de nombres qui décrivent les groupes de cellules bleues apparaissant sur ces lignes et colonnes. 
+           conditionalPanel(
+             condition = "output.gridExists",
+             plotOutput("grid", click = "grid_click", height = "800px")  
+           ),
+           conditionalPanel(
+             condition = "!output.gridExists",
+             tags$div(
+               style = "text-align: center; padding: 50px;",
+               tags$h1("Nonograms ", style = "color: #3399FF;"),
+               tags$p("Le but de ce jeu est de découvrir une planche de cellules bleues et de cellules libres. 
                         En exemple 1 5 2 représente successivement: 1 cellule, 5 cellules et 2 cellules bleues séparées entre elles par une ou plusieurs cellules vides.
                         Cliquez les cellules une fois pour les marquer occupées. Cliquez encore une fois afin de les marquer avec un X.", style = "font-size: 15px;")
-               )
              )
            )
+           
     )
   )
 )
@@ -250,21 +247,19 @@ server <- function(input, output, session) {
     grid_size(input$gridSize)  # Update grid size
     result <- gameCreate(grid_size(), input$difficulty)
     solution(result$X)  # Store the solution
-    #print(solution)
     indications(list(horizontal = result$matindichori, vertical = result$matindicvert))  # Update indications
     grid_state(matrix(0, nrow = grid_size(), ncol = grid_size()))  # Initialize grid_state with a blank grid
   })
   
   observeEvent(input$verify, {  # Listen for clicks on the verify button
-    print(rot(grid_state()))
-    #print(solution()== rot(grid_state()))
+    print(rotate90(grid_state()))
+    #print(solution()== rotate90(grid_state()))
     #transform all cells that are 2 to 0
-    test<-rot(grid_state())
+    test<-rotate90(grid_state())
     test[test == 2] <- 0
     if(all(test==solution())) {
-      showNotification("Congratulations! You have solved the game.", type = "message")
+      showNotification("Congratulations!", type = "message")
     } else {
-      # If not all cells are filled, show a warning message
       showNotification("The game is not yet solved. Keep trying!", type = "warning")
     }
   })
@@ -276,18 +271,16 @@ server <- function(input, output, session) {
   outputOptions(output, "gridExists", suspendWhenHidden = FALSE)
   
   output$grid <- renderPlot({
-    # Draw the grid based on the state of each cell
     if (!is.null(grid_state()) && !is.null(grid_size()) && !is.null(indications())) {
       draw_grid(grid_state(), grid_size(), indications())
     }
   }, res = 100)
   
   observeEvent(input$grid_click, {
-    # Update the state of the clicked cell
-    if (!is.null(grid_state()) && !is.null(grid_size())) {
-      x <- floor(input$grid_click$x)
+    if (!is.null(grid_state()) && !is.null(grid_size())) {#vérifier que grid_state() et grid_size() ont été correctement initialisés 
+      x <- floor(input$grid_click$x)#floor c'est pour s'assurer qu'il s'agit d'un entier
       y <- floor(input$grid_click$y)
-      if(x < 1 || x > grid_size() || y < 1 || y > grid_size()) {
+      if(x < 1 || x > grid_size() || y < 1 || y > grid_size()) {#Si les coordonnées sont hors des dimensions réelles de la grille, la fct ne fait rien et se termine.
         return()
       }
       current_state <- grid_state()
@@ -303,5 +296,4 @@ server <- function(input, output, session) {
   })
 }
 
-# Run the app
-shinyApp(ui = ui, server = server)
+shinyApp(ui, server )
