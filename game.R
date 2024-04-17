@@ -9,8 +9,6 @@ gameCreate <- function(n, difficulty) {
   compteurV <- rep(0, n)
   matindichori <- matrix(data = 0, nrow = n, ncol = floor(n/2) + 1)
   matindicvert <- matrix(data = 0, nrow = floor(n/2) + 1, ncol = n)
-  
-  
   matrice <- rbinom(n * n, 1, p)
   X <- matrix(matrice, n, byrow = TRUE)
   
@@ -23,7 +21,7 @@ gameCreate <- function(n, difficulty) {
     
   }
   
-  if (difficulty == "Hard") {
+  if (difficulty == "Expert") {
     a <- n + 1
     while(a == n + 1) {
       a <- 0
@@ -63,7 +61,7 @@ gameCreate <- function(n, difficulty) {
         matindichori[is.na(matindichori)] <- ""
         ind1 <- c()
       }
-      
+      # Pour les colonnes verticales
       X_t = t(X) # Transposer la matrice
       
       for (i in 1:n) {
@@ -127,7 +125,7 @@ gameCreate <- function(n, difficulty) {
       matindichori[is.na(matindichori)] <- ""
       ind1 <- c()
     }   
-    # Pour les colonnes verticales
+    
     X_t = t(X) # Transposer la matrice
     for (i in 1:n) {
       for(j in 1:n)
@@ -162,11 +160,10 @@ gameCreate <- function(n, difficulty) {
     }
   }
   
-  
   return(list(matindichori = matindichori, matindicvert = matindicvert, X = X, compteurH = compteurH, compteurV = compteurV))
 }
 
-# Function to draw the grid
+# Fonction draw the grid
 draw_grid <- function(grid_state, gridSize, indications) {
   
   plot(1:gridSize, 1:gridSize, type = "n", xlab = "", ylab = "", xaxt = 'n', yaxt = 'n', xlim = c(-gridSize*0.10, gridSize+1), ylim = c(1, gridSize*1.2), asp = 1, bty = "n")
@@ -214,6 +211,7 @@ ui <- fluidPage(
            )
     ),
     column(8,
+           
            conditionalPanel(
              condition = "output.gridExists",
              plotOutput("grid", click = "grid_click", height = "800px")  
@@ -243,24 +241,21 @@ server <- function(input, output, session) {
   indications <- reactiveVal()
   solution <- reactiveVal()
   
-  observeEvent(input$update, {  # Listen for clicks on the update button
-    grid_size(input$gridSize)  # Update grid size
-    result <- gameCreate(grid_size(), input$difficulty)
-    solution(result$X)  # Store the solution
+  observeEvent(input$update, { #generate
+    grid_size(input$gridSize)  #ajuste la taille de la grille du jeu en fonction de la sélection de l'utilisateur via un curseur.
+    result <- gameCreate(grid_size(), input$difficulty) #crée une nouvelle instance du jeu avec la taille de grille et la difficulté spécifiées. Cette fonction retourne probablement une liste contenant l'état initial du jeu et des indices.
+    solution(result$X)  #obtenir X
     indications(list(horizontal = result$matindichori, vertical = result$matindicvert))  # Update indications
-    grid_state(matrix(0, nrow = grid_size(), ncol = grid_size()))  # Initialize grid_state with a blank grid
+    grid_state(matrix(0, nrow = grid_size(), ncol = grid_size()))  # Initialization 
   })
   
-  observeEvent(input$verify, {  # Listen for clicks on the verify button
-    print(rotate90(grid_state()))
-    #print(solution()== rotate90(grid_state()))
-    #transform all cells that are 2 to 0
+  observeEvent(input$verify, {  #vérifie si la grille modifiée correspond à la solution stockée
     test<-rotate90(grid_state())
     test[test == 2] <- 0
-    if(all(test==solution())) {
+    if(all(test==solution())) { 
       showNotification("Congratulations!", type = "message")
     } else {
-      showNotification("The game is not yet solved. Keep trying!", type = "warning")
+      showNotification("There are mistakes in the puzzle solution.", type = "warning")
     }
   })
   
@@ -278,7 +273,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$grid_click, {
     if (!is.null(grid_state()) && !is.null(grid_size())) {#vérifier que grid_state() et grid_size() ont été correctement initialisés 
-      x <- floor(input$grid_click$x)#floor c'est pour s'assurer qu'il s'agit d'un entier
+      x <- floor(input$grid_click$x)
       y <- floor(input$grid_click$y)
       if(x < 1 || x > grid_size() || y < 1 || y > grid_size()) {#Si les coordonnées sont hors des dimensions réelles de la grille, la fct ne fait rien et se termine.
         return()
@@ -289,8 +284,6 @@ server <- function(input, output, session) {
       }
       current_state[x, y] <- current_state[x, y]+1
       grid_state(current_state)
-      
-      # Redraw the grid
       draw_grid(grid_state(), grid_size(), indications())
     }
   })
